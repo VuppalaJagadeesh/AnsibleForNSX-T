@@ -44,7 +44,7 @@ logger.setLevel(10)
 headers = dict(Accept="application/json")
 headers['Content-Type'] = 'application/json'
 
-create_cert = """openssl req -newkey rsa:2048 -x509 -nodes -keyout nsx.key -new -out nsx.crt -subj /CN=$NSX_MANAGER_COMMONNAME -reqexts SAN -extensions SAN -config <(cat ./nsx-cert.cnf \
+create_cert = """openssl req -newkey rsa:2048 -x509 -nodes -keyout nsx.key -new -out nsx.crt -subj /CN=$NSX_MANAGER_COMMONNAME -reqexts SAN -extensions SAN -config <(cat /opt/chaperone-ansible/roles/nsxt/defaults/nsx-cert.cnf \
  <(printf "[SAN]\nsubjectAltName=DNS:$NSX_MANAGER_COMMONNAME,IP:$NSX_MANAGER_IP_ADDRESS")) -sha256 -days 365"""
 
 

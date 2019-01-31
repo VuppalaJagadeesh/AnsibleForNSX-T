@@ -164,13 +164,14 @@ def main():
                        NSX_MANAGER =dict(required=True, type= 'str'),
                        NSX_USER =dict(required=True, type= 'str'),
                        NSX_PASSWORD=dict(required=True, type='str'),
-		       validate_certs= dict(required=True, type= 'bool'))
+		       validate_certs= dict(required=True, type= 'bool'),
+                       PI_NAME=dict(required=True, type='str'))
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)  
     logger.info("after module")       
     NSX_MANAGER = module.params["NSX_MANAGER"]
     NSX_USER = module.params["NSX_USER"]
     NSX_PASSWORD = module.params["NSX_PASSWORD"]
-    PI_NAME = "nsxt_superuser_cert"
+    PI_NAME = module.params["PI_NAME"]
     validate_certs = module.params["validate_certs"]   
     NSX_SUPERUSER_CERT_FILE = "/home/vmware/pks-nsx-t-superuser.crt"
     NSX_SUPERUSER_KEY_FILE = "/home/vmware/pks-nsx-t-superuser.key"
