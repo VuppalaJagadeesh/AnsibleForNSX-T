@@ -1,26 +1,28 @@
 #!/usr/bin/env python
-# coding=utf-8
+# -*- coding: utf-8 -*-
+# Copyright 2016 VMware, Inc.  All rights reserved.
+
+# Portions Copyright (c) 2015 VMware, Inc. All rights reserved.
 #
-# Copyright © 2015 VMware, Inc. All Rights Reserved.
+# This file is part of Ansible
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions
-# of the Software.
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-# TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
-#__author__ = 'VJ49'
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 import paramiko
 import string
 import pyVim.task
+
 
 from pyVmomi import vim, vmodl
 from pyVim import connect
@@ -42,8 +44,7 @@ logger.setLevel(10)
 headers = dict(Accept="application/json")
 headers['Content-Type'] = 'application/json'
 
-create_cert = """openssl req -newkey rsa:2048 -x509 -nodes -keyout nsx.key -new -out nsx.crt -subj /CN=$NSX_MANAGER_COMMONNAME \
- -reqexts SAN -extensions SAN -config <(cat /opt/chaperone-ansible/roles/nsxt/defaults/nsx-cert.cnf \
+create_cert = """openssl req -newkey rsa:2048 -x509 -nodes -keyout nsx.key -new -out nsx.crt -subj /CN=$NSX_MANAGER_COMMONNAME -reqexts SAN -extensions SAN -config <(cat ./nsx-cert.cnf \
  <(printf "[SAN]\nsubjectAltName=DNS:$NSX_MANAGER_COMMONNAME,IP:$NSX_MANAGER_IP_ADDRESS")) -sha256 -days 365"""
 
 
@@ -59,25 +60,33 @@ register_cert = """curl --insecure -u admin:'admin_pw' -X POST 'https://NSX-Mana
 def Self_Signed_Cert(pi,module,request_data,NSX_MANAGER_COMMONNAME,NSX_MANAGER_IP_ADDRESS,NSX_USER,NSX_PASSWORD,validate_certs,cert_name,manager_url):
     #create_cert1 = string.replace(create_cert, "$NSX_MANAGER_IP_ADDRESS",NSX_MANAGER_IP_ADDRESS)
     create_cert1 = string.replace(create_cert, "$NSX_MANAGER_IP_ADDRESS",NSX_MANAGER_IP_ADDRESS)
-    create_cert2 = string.replace(create_cert1, "$NSX_MANAGER_COMMONNAME",NSX_MANAGER_COMMONNAME) 
+    create_cert2 = string.replace(create_cert1, "$NSX_MANAGER_COMMONNAME",NSX_MANAGER_COMMONNAME)
+    logger.info(create_cert2) 
     register_cert1 = string.replace(register_cert, "admin_pw" , NSX_PASSWORD)
     register_cert2 = string.replace(register_cert1, "NSX-Manager-IP-Address", NSX_MANAGER_IP_ADDRESS)
     
     try:
         (sshin1, sshout1, ssherr1) = pi.exec_command(create_cert2)          
         output = sshout1.read()
+        output1 = ssherr1.read()
         logger.info(output)
+        logger.info(output1)
 		
         (sshin2, sshout2, ssherr2) = pi.exec_command(verify_cert)
         logger.info(sshout2.read())
+        logger.info(search_pemcode)
         (sshin3, sshout3, ssherr3) = pi.exec_command(search_pemcode)
+        pem_encoded=sshout3.read()
+        logger.info(pem_encoded)        
         (sshin4, sshout4, ssherr4) = pi.exec_command(search_private_key)
+        private_key =sshout4.read()
 
-        request_data["pem_encoded"] = sshout3.read()
-        request_data["private_key"] = sshout4.read()
+        request_data["pem_encoded"] = pem_encoded
+        logger.info(request_data)
+        request_data["private_key"] = private_key
         request_data["display_name"] = cert_name
 		
-        logger.info(cert_name)
+        logger.info(request_data)
         cert_id = get_certificate_id_with_name(module,manager_url, NSX_USER, NSX_PASSWORD, validate_certs,cert_name )
         import_cert = import_certificate(module,manager_url,NSX_USER,NSX_PASSWORD, validate_certs, request_data,cert_id)
         cert_id = get_certificate_id_with_name(module,manager_url, NSX_USER, NSX_PASSWORD, validate_certs,cert_name )

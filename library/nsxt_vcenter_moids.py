@@ -16,7 +16,8 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#__author__ = 'VJ49'
+
+__author__ = 'VJ49'
 
 from pyVmomi import vim, vmodl
 from pyVim import connect
@@ -37,11 +38,12 @@ hdlr.setFormatter(formatter)
 logger.addHandler(hdlr) 
 logger.setLevel(10)
 
-VIM_TYPES = {'datacenter': [vim.Datacenter],
+""" 
+    VIM_TYPES = {'datacenter': [vim.Datacenter],
              'dvs_name': [vim.dvs.VmwareDistributedVirtualSwitch],
              'datastore_name': [vim.Datastore],
              'resourcepool_name': [vim.ResourcePool],
-             'portgroup_name': [vim.dvs.DistributedVirtualPortgroup, vim.Network]}
+             'portgroup_name': [vim.dvs.DistributedVirtualPortgroup, vim.Network]} """
 
 
 def get_all_objs(module,content, vimtype):
@@ -63,15 +65,9 @@ def find_object_by_name(module,content, object_name):
             vmware_objects = get_all_objs(module,content,[vim.Datastore])
     	elif (object_name == module.params['portgroup1'] or module.params['portgroup2'] or module.params['portgroup3'] or module.params['portgroup4'] ):
             vmware_objects = get_all_objs(module,content,[vim.dvs.DistributedVirtualPortgroup, vim.Network])
-            if(object_name == module.params['portgroup4']):
-
-        
-        logger.info("new status:{}".format(object_name))
+ 
     	for object in vmware_objects:
-            logger.info(vmware_objects)
-            logger.info("new status1:{}".format(object.name))
             if object.name == object_name:
-                
             	logger.info('object: %s',object.name)
             	return object
     	return None
@@ -84,7 +80,7 @@ def find_object_by_name(module,content, object_name):
 
 def main():
   argument_spec = vmware_argument_spec()
-
+ 
   argument_spec.update(
         dict(hostname= dict(required=True, type='str'),
             username=dict(required=True, type='str'),
@@ -119,35 +115,22 @@ def main():
   portgroup2= module.params['portgroup2']
   portgroup3= module.params['portgroup3']
   portgroup4= module.params['portgroup4']
-  logger.info(portgroup4)
 
   try:
   	datacenter_mo = find_object_by_name(module,content, datacenter)
-        
   	datacenter_moid =  datacenter_mo._moId
-        logger.info(datacenter_moid)
   	cluster_mo = find_object_by_name(module,content, cluster)
   	cluster_moid = cluster_mo._moId
-        logger.info(cluster_moid)
   	datastore_mo = find_object_by_name(module,content, datastore)
   	datastore_moid = datastore_mo._moId
-        logger.info(datastore_moid)
   	portgroup1_mo = find_object_by_name(module,content, portgroup1)
-        logger.info(portgroup1_mo)
   	portgroup1_moid = portgroup1_mo._moId
-        logger.info(portgroup1_moid)
   	portgroup2_mo = find_object_by_name(module,content, portgroup2)
-        logger.info(portgroup2_mo)
   	portgroup2_moid = portgroup2_mo._moId
-        logger.info(portgroup2_moid)
   	portgroup3_mo = find_object_by_name(module,content, portgroup3)
-        logger.info(portgroup3_mo)
  	portgroup3_moid = portgroup3_mo._moId
-        logger.info(portgroup3_moid)
   	portgroup4_mo = find_object_by_name(module,content, portgroup4)
-        logger.info(portgroup4_mo)
   	portgroup4_moid = portgroup4_mo._moId
-        logger.info(portgroup4_moid)
         #module.exit_json(changed=True, msg= "success")
   	module.exit_json(changed=True,datacenter_id=datacenter_moid,cluster_id=cluster_moid,datastore_id=datastore_moid, portgroup1_id=portgroup1_moid,portgroup2_id=portgroup2_moid,portgroup3_id=portgroup3_moid,portgroup4_id=portgroup4_moid,
                             msg= "datacenter:%s, cluster:%s, datastore:%s, portgroup1:%s, portgroup2:%s, portgroup3:%s, portgroup4:%s" %(datacenter_moid, cluster_moid, datastore_moid, portgroup1_moid, portgroup2_moid, portgroup3_moid, portgroup4_moid))
