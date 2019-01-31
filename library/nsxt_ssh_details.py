@@ -22,6 +22,7 @@
 
 import json
 import yaml
+import subprocess
 ## LOGGER
 import logging
 logger = logging.getLogger('chaperone_details')
@@ -34,16 +35,15 @@ logger.setLevel(10)
 
     
 def main():
-    module = AnsibleModule(argument_spec=dict(), supports_check_mode=True)  
-    rc, out, err = module.run_command(['hostname', '-i'])
-    logger.debug("rc-{}".format(out))
-    rc1, out1, err1 = module.run_command(['whoami'])       
-    logger.debug("rc-{}".format(out1))
-    if rc==0:
-        module.exit_json(changed=True, hostname=out.rstrip("\n"), username=out1.rstrip("\n"), msg='Got cert details')
-    else:
-        module.fail_json(changed=False, msg='Error getting details')        
-    
+    module = AnsibleModule(argument_spec=dict(), supports_check_mode=True)
+    cmd = ["""ip address | grep 'ens160'| grep 'inet' | awk '{print $2}'"""]
+    output =subprocess.check_output(cmd,shell=True)
+    output = output.rstrip("\n")
+    rest = output.replace("/24","")
+    cmd1 = ["whoami"]
+    output1 = subprocess.check_output(cmd1,shell=True)
+    module.exit_json(changed=True, hostname=rest, username = output1.rstrip("\n"), msg='Got cert details')
+
     
         
     
