@@ -105,7 +105,7 @@ def main():
 	#pass
 	#atexit.register(Disconnect, si)
 	logger.info("Connection failed {0}")
-        module.fail_json(chagned=False, msg="Failed to connect vCenter")
+        module.fail_json(changed=False, msg="Failed to connect vCenter")
   content = si.RetrieveContent()
 
   datacenter= module.params['datacenter']
