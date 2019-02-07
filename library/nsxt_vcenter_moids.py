@@ -63,7 +63,7 @@ def find_object_by_name(module,content, object_name):
     	    vmware_objects = get_all_objs(module,content,[vim.ComputeResource])
     	elif (object_name == module.params['datastore']):
             vmware_objects = get_all_objs(module,content,[vim.Datastore])
-    	elif (object_name == module.params['portgroup1'] or module.params['portgroup2'] or module.params['portgroup3'] or module.params['portgroup4'] ):
+    	elif (object_name == module.params['portgroup1'] or module.params['portgroup2'] or module.params['portgroup3'] ):
             vmware_objects = get_all_objs(module,content,[vim.dvs.DistributedVirtualPortgroup, vim.Network])
  
     	for object in vmware_objects:
@@ -90,8 +90,7 @@ def main():
             datastore=dict(required=True,type='str'),
             portgroup1= dict(required=True,type='str'),
             portgroup2= dict(required=True, type='str'),
-            portgroup3=dict(required=True, type='str'),
-            portgroup4=dict(required=True, type='str')))
+            portgroup3=dict(required=True, type='str')))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
   try:
@@ -114,7 +113,6 @@ def main():
   portgroup1= module.params['portgroup1']
   portgroup2= module.params['portgroup2']
   portgroup3= module.params['portgroup3']
-  portgroup4= module.params['portgroup4']
 
   try:
   	datacenter_mo = find_object_by_name(module,content, datacenter)
@@ -129,11 +127,9 @@ def main():
   	portgroup2_moid = portgroup2_mo._moId
   	portgroup3_mo = find_object_by_name(module,content, portgroup3)
  	portgroup3_moid = portgroup3_mo._moId
-  	portgroup4_mo = find_object_by_name(module,content, portgroup4)
-  	portgroup4_moid = portgroup4_mo._moId
         #module.exit_json(changed=True, msg= "success")
-  	module.exit_json(changed=True,datacenter_id=datacenter_moid,cluster_id=cluster_moid,datastore_id=datastore_moid, portgroup1_id=portgroup1_moid,portgroup2_id=portgroup2_moid,portgroup3_id=portgroup3_moid,portgroup4_id=portgroup4_moid,
-                            msg= "datacenter:%s, cluster:%s, datastore:%s, portgroup1:%s, portgroup2:%s, portgroup3:%s, portgroup4:%s" %(datacenter_moid, cluster_moid, datastore_moid, portgroup1_moid, portgroup2_moid, portgroup3_moid, portgroup4_moid))
+  	module.exit_json(changed=True,datacenter_id=datacenter_moid,cluster_id=cluster_moid,datastore_id=datastore_moid, portgroup1_id=portgroup1_moid,portgroup2_id=portgroup2_moid,portgroup3_id=portgroup3_moid,
+                            msg= "datacenter:%s, cluster:%s, datastore:%s, portgroup1:%s, portgroup2:%s, portgroup3:%s" %(datacenter_moid, cluster_moid, datastore_moid, portgroup1_moid, portgroup2_moid, portgroup3_moid))
   except Exception as err:
 	module.fail_json(changed=False, msg="Error Occured:%s" %err) 
     
